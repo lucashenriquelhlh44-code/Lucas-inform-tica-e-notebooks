@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+
+
+<html lang="pt-BR">
+
+
+<head>
+
+
+<meta charset="UTF-8">
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>Lucas Informática e Notebooks</title>
+
+
+<script src="https:/cdn.tailwindcss.com"></script>
+
+
+</head>
+
+
+<body class="bg-gray-100 font-sans text-gray-800">
+
+
+<header class="bg-blue-900 text-white p-6 shadow-md">
+
+
+<div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
+
+
+<div class="text-center md:text-left">
+
+
+<h1 class="text-3xl font-bold">Lucas Informática e Notebooks</h1>
+
+
+<p class="text-sm text-blue-200">Manutenção Especializada em Notebooks &
+
+
+Venda de Equipamentos</p>
+
+
+</div>
+
+
+<div class="mt-4 md:mt-0 text-center md:text-right text-sm">
+
+
+<p>📍 Vila Velha - ES</p>
+
+
+<p>📞 WhatsApp: (27) 99999-9999</p>
+
+
+</div>
+
+
+</div>
+
+
+</header>
+
+
+<div class="max-w-6xl mx-auto my-8 p-4 grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+
+<!-- FORMULÁRIO DE ORDEM DE SERVIÇO --><div class="bg-white p-6 rounded-lg shadow-md">
+
+
+<h2 class="text-xl font-bold text-blue-900 border-b pb-2 mb-4">📋 Abertura de
+
+
+Ordem de Serviço (O.S.)</h2>
+
+
+<form id="formOS" class="space-y-4">
+
+
+<div>
+
+
+<label class="block text-sm font-semibold">Nome Completo *</label>
+
+
+<input type="text" id="nome" class="w-full border p-2 rounded focus:ring-2
+
+
+focus:ring-blue-500" required>
+
+
+</div>
+
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+
+
+<div>
+
+
+<label class="block text-sm font-semibold">CPF / CNPJ *</label>
+
+
+<input type="text" id="cpf" class="w-full border p-2 rounded" required>
+
+
+</div>
+
+
+<div>
+
+
+<label class="block text-sm font-semibold">Telefone / WhatsApp *</label>
+
+
+<input type="text" id="telefone" class="w-full border p-2 rounded" required>
+
+
+</div>
+
+
+</div>
+
+
+<div>
+
+
+<label class="block text-sm font-semibold">E-mail *</label>
+
+
+<input type="email" id="email" class="w-full border p-2 rounded" required>
+
+
+</div>
+
+
+<h3 class="text-md font-bold text-gray-700 pt-3 border-t">💻 Dados do
+
+
+Equipamento</h3>
+
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+
+
+<div>
+
+
+<label class="block text-sm font-semibold">Marca / Modelo *</label>
+
+
+<input type="text" id="modelo" placeholder="Ex: Dell Inspiron 15"
+
+
+class="w-full border p-2 rounded" required>
+
+
+</div>
+
+
+<div>
+
+
+<label class="block text-sm font-semibold">Número de Série (S/N)</label>
+
+
+<input type="text" id="num_serie" class="w-full border p-2 rounded">
+
+
+</div>
+
+
+</div>
+
+
+<div>
+
+
+<label class="block text-sm font-semibold">Senha do Windows / PIN</label><input type="text" id="senha" placeholder="Deixe em branco se não desejar
+
+
+informar" class="w-full border p-2 rounded">
+
+
+</div>
+
+
+<h3 class="text-md font-bold text-gray-700 pt-3 border-t">📝 Defeito
+
+
+Relatado</h3>
+
+
+<textarea id="defeito" rows="3" class="w-full border p-2 rounded"
+
+
+placeholder="Descreva os problemas observados no aparelho..." required></textarea>
+
+
+<p class="text-xs text-gray-500">🔒 Seus dados pessoais estão totalmente
+
+
+protegidos de acordo com a LGPD e serão utilizados apenas para fins de suporte
+
+
+técnico.</p>
+
+
+<button type="submit" class="w-full bg-blue-700 text-white font-bold py-2.5
+
+
+rounded hover:bg-blue-800 transition">Enviar Equipamento para Análise</button>
+
+
+</form>
+
+
+</div>
+
+
+<!-- LOJA DE EQUIPAMENTOS E PEÇAS -->
+
+
+<div class="space-y-6">
+
+
+<h2 class="text-xl font-bold text-blue-900 border-b pb-2">🛒 Loja & Vitrine de
+
+
+Produtos</h2>
+
+
+<div>
+
+
+<h3 class="font-bold text-lg text-gray-700 mb-2">💻 Notebooks
+
+
+Selecionados</h3>
+
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="vitrine-notebooks"></div>
+
+
+</div>
+
+
+<div>
+
+
+<h3 class="font-bold text-lg text-gray-700 mb-2">🔧 Peças de Reposição</h3>
+
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="vitrine-pecas"></div>
+
+
+</div>
+
+
+<div>
+
+
+<h3 class="font-bold text-lg text-gray-700 mb-2">🖱 Periféricos</h3>
+
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="vitrine-perifericos"></div>
+
+
+</div>
+
+
+</div></div>
+
+
+<script>
+
+
+const produtos = {
+
+
+notebooks: [
+
+
+{ id: 1, nome: "Notebook Dell Inspiron i5 16GB SSD 512GB", preco: 2890.00 },
+
+
+{ id: 2, nome: "Notebook Lenovo ThinkPad Ryzen 7 16GB", preco: 3200.00 },
+
+
+{ id: 3, nome: "Notebook Acer Aspire 5 i3 8GB SSD 256GB", preco: 1950.00 },
+
+
+{ id: 4, nome: "Notebook Gamer Asus TUF i7 RTX 3050", preco: 4500.00 },
+
+
+{ id: 5, nome: "MacBook Air M1 8GB 256GB SSD", preco: 4990.00 }
+
+
+],
+
+
+pecas: [
+
+
+{ id: 6, nome: "SSD NVMe M.2 1TB Kingston NV2", preco: 380.00 },
+
+
+{ id: 7, nome: "Memória RAM Notebook 16GB DDR4 3200MHz", preco: 220.00 },
+
+
+{ id: 8, nome: "Bateria para Notebook Dell 4 Células", preco: 190.00 },
+
+
+{ id: 9, nome: "Tela LED 15.6 Full HD Slim 30 Pinos", preco: 350.00 },
+
+
+{ id: 10, nome: "Fonte Carregador Universal Notebook 90W", preco: 95.00 }
+
+
+],
+
+
+perifericos: [
+
+
+{ id: 11, nome: "Mouse Sem Fio Logitech M170", preco: 65.00 },
+
+
+{ id: 12, nome: "Teclado Mecânico RGB Switch Red", preco: 180.00 },
+
+
+{ id: 13, nome: "Headset Gamer USB 7.1 Surround", preco: 140.00 },
+
+
+{ id: 14, nome: "Base Refrigerada para Notebook com LED", preco: 85.00 },
+
+
+{ id: 15, nome: "Webcam Full HD 1080p com Microfone", preco: 110.00 }
+
+
+]
+
+
+};
+
+
+function renderizarProdutos() {
+
+
+const montarGrid = (lista, elementId) => {
+
+
+const el = document.getElementById(elementId);
+
+
+el.innerHTML = lista.map(p => `
+
+
+<div class="bg-white p-3 rounded shadow-sm border border-gray-200 flex
+
+
+flex-col justify-between">
+
+
+<div>
+
+
+<p class="font-semibold text-sm text-gray-800">\${p.nome}</p>
+
+
+<p class="text-blue-900 font-bold text-base mt-1">R$
+
+
+\${p.preco.toFixed(2)}</p>
+
+
+</div>
+
+
+<button onclick="comprar('\${p.nome}', \${p.preco})" class="mt-3 w-fullbg-green-600 text-white text-xs py-2 rounded font-bold hover:bg-green-700
+
+
+transition">Comprar com PIX</button>
+
+
+</div>
+
+
+`).join('');
+
+
+};
+
+
+montarGrid(produtos.notebooks, 'vitrine-notebooks');
+
+
+montarGrid(produtos.pecas, 'vitrine-pecas');
+
+
+montarGrid(produtos.perifericos, 'vitrine-perifericos');
+
+
+}
+
+
+document.getElementById('formOS').addEventListener('submit', async (e) => {
+
+
+e.preventDefault();
+
+
+const payload = {
+
+
+nome: document.getElementById('nome').value,
+
+
+cpf: document.getElementById('cpf').value,
+
+
+telefone: document.getElementById('telefone').value,
+
+
+email: document.getElementById('email').value,
+
+
+modelo: document.getElementById('modelo').value,
+
+
+num_serie: document.getElementById('num_serie').value,
+
+
+senha: document.getElementById('senha').value,
+
+
+defeito: document.getElementById('defeito').value
+
+
+};
+
+
+const res = await fetch('/api/os', {
+
+
+method: 'POST',
+
+
+headers: { 'Content-Type': 'application/json' },
+
+
+body: JSON.stringify(payload)
+
+
+});
+
+
+const data = await res.json();
+
+
+if (data.success) {
+
+
+alert(\`Ordem de Serviço #\${data.os_id} cadastrada com sucesso!\`);
+
+
+e.target.reset();
+
+
+} else {
+
+
+alert("Erro ao cadastrar OS.");
+
+
+}
+
+
+});
+
+
+async function comprar(titulo, valor) {const email = prompt("Digite seu e-mail para receber a confirmação:");
+
+
+const cpf = prompt("Digite seu CPF:");
+
+
+if (!email || !cpf) return alert("E-mail e CPF são obrigatórios.");
+
+
+const res = await fetch('/api/checkout', {
+
+
+method: 'POST',
+
+
+headers: { 'Content-Type': 'application/json' },
+
+
+body: JSON.stringify({ item_titulo: titulo, valor, email_cliente: email, cpf_cliente:
+
+
+cpf })
+
+
+});
+
+
+const data = await res.json();
+
+
+if (data.qr_code) {
+
+
+prompt("Copie o código PIX abaixo para pagar no app do seu banco:",
+
+
+data.qr_code);
+
+
+} else {
+
+
+alert("Erro ao gerar o PIX.");
+
+
+}
+
+
+}
+
+
+renderizarProdutos();
+
+
+</script>
+
+
+</body>
+
+
+</html>
