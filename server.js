@@ -226,7 +226,19 @@ res.status(500).json({ error: error.message });
 }
 
 
-});const PORT = process.env.PORT || 3000;
+});
+
+// Rota para listar todas as ordens de serviço cadastradas
+app.get('/api/ordens', (req, res) => {
+  db.all("SELECT * FROM ordem_servico", [], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ erro: err.message });
+    }
+    res.json(rows);
+  });
+});
+
+const PORT = process.env.PORT || 3000;
 
 
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
