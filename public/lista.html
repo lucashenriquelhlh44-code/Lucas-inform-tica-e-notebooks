@@ -105,6 +105,36 @@
       .catch(() => {
         document.getElementById('listaOrdens').className = 'empty-msg';
         document.getElementById('listaOrdens').innerHTML = '<p style="color: #ff6b6b;">Erro ao carregar as ordens de serviço.</p>';
+        // Escuta novas ordens em tempo real
+const evtSource = new EventSource('/api/notificacoes');
+
+evtSource.onmessage = (event) => {
+  const novaOrdem = JSON.parse(event.data);
+  exibirPopupNotificacao(novaOrdem);
+  
+  // Recarrega a página automaticamente para o novo card aparecer
+  setTimeout(() => {
+    location.reload();
+  }, 1500);
+};
+
+function exibirPopupNotificacao(ordem) {
+  const popup = document.createElement('div');
+  popup.className = 'popup-notificacao';
+  popup.innerHTML = `
+    <strong>🔔 Nova Ordem de Serviço!</strong><br>
+    <span>Cliente: ${ordem.cliente_nome}</span><br>
+    <small>Equipamento: ${ordem.equipamento_modelo}</small>
+  `;
+
+  document.body.appendChild(popup);
+
+  // Remove o pop-up após 5 segundos
+  setTimeout(() => {
+    popup.remove();
+  }, 5000);
+}
+
       });
   </script>
 </body>
