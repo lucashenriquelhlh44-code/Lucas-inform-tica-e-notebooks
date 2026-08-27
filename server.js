@@ -26,16 +26,15 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-// Inicialização do Banco de Dados SQLiteconst db = new sqlite3.Database('./lucas_informatica.db', (err) => {
-
-
-if (err) console.error("Erro ao abrir banco de dados:", err.message);
-
-
-else console.log("Banco de Dados SQLite conectado com sucesso.");
-
-
+// Inicialização do Banco de Dados SQLite
+const db = new sqlite3.Database('./lucas_informatica.db', (err) => {
+  if (err) {
+    console.error("Erro ao abrir banco de dados:", err.message);
+  } else {
+    console.log("Banco de Dados SQLite conectado com sucesso.");
+  }
 });
+
 
 
 // Criação da Tabela de Ordens de Serviço (Tabela completa baseada no modelo original)
