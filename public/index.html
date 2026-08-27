@@ -295,7 +295,55 @@
           cepStatus.innerText = 'Erro ao buscar CEP.';
         });
     }
-  </script>
+    
+</script>
+
+<script>
+  // Envio da Ordem de Serviço
+  const formOS = document.querySelector('form') || document.getElementById('formOS');
+  if (formOS) {
+    formOS.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const dadosFormulario = {
+        cliente_nome: document.getElementById('nome')?.value || '',
+        cliente_cpf: document.getElementById('cpf')?.value || '',
+        cliente_telefone: document.getElementById('telefone')?.value || '',
+        cliente_email: document.getElementById('email')?.value || '',
+        cep: document.getElementById('cep')?.value || '',
+        rua: document.getElementById('rua')?.value || '',
+        numero: document.getElementById('numero')?.value || '',
+        bairro: document.getElementById('bairro')?.value || '',
+        cidade: document.getElementById('cidade')?.value || '',
+        equipamento_modelo: document.getElementById('modelo')?.value || '',
+        numero_serie: document.getElementById('serie')?.value || '',
+        senha_windows: document.getElementById('senha')?.value || '',
+        acessorios: document.getElementById('acessorios')?.value || '',
+        defeito_relatado: document.getElementById('defeito')?.value || ''
+      };
+
+      try {
+        const response = await fetch('/api/os', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dadosFormulario)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('Ordem de serviço enviada com sucesso!');
+          window.location.href = '/lista.html';
+        } else {
+          alert('Erro ao enviar ordem de serviço: ' + (result.error || 'Erro desconhecido'));
+        }
+      } catch (error) {
+        console.error('Erro na requisição:', error);
+        alert('Falha na comunicação com o servidor.');
+      }
+    });
+  }
+</script>
 
 </body>
 </html>
