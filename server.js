@@ -9,6 +9,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Lista de clientes conectados esperando notificações
+let clientesSSE = [];
+
 // Criar tabela de Ordens de Serviço se não existir
 db.serialize(() => {
   db.run(`
@@ -33,6 +36,26 @@ db.serialize(() => {
     )
   `);
 });
+
+// Rota SSE para notificações em tempo real
+app.get('/api/notificacoes', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  clientesSSE.push(res);
+
+  req.on('close', () => {
+    clientesSSE = clientesSSE.filter(cliente => cliente !== res);
+  });
+});
+
+// Função para avisar todos os painéis abertos
+function notificarNovosClientes(dadosOrdem) {
+  clientesSSE.forEach(cliente => {
+    cliente.write(`data: ${JSON.stringify(dadosOrdem)}\n\n`);
+  });
+}
 
 // Rota para cadastrar nova ordem
 app.post('/api/os', (req, res) => {
@@ -61,6 +84,16 @@ app.post('/api/os', (req, res) => {
       console.error("Erro ao salvar ordem:", err.message);
       return res.status(500).json({ error: err.message });
     }
+
+    const novaOrdem = {
+      id: this.lastID,
+      cliente_nome,
+      equipamento_modelo
+    };
+
+    // Dispara o aviso em tempo real
+    notificarNovosClientes(novaOrdem);
+
     console.log("Nova ordem cadastrada com ID:", this.lastID);
     res.json({ success: true, id: this.lastID });
   });
@@ -73,7 +106,6 @@ app.get('/api/ordens', (req, res) => {
       console.error("Erro ao buscar ordens:", err.message);
       return res.status(500).json({ error: err.message });
     }
-    console.log("Ordens encontradas no banco:", rows.length);
     res.json(rows);
   });
 });
