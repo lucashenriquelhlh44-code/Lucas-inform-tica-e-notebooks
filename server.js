@@ -148,10 +148,7 @@ return res.status(500).json({ success: false, error: err.message });
 }
 
 
-res.json({ success: true, os_id: this.lastID, message: "Ordem de serviço aberta com
-
-
-sucesso!" });
+res.json({ success: true, os_id: this.lastID, message: "Ordem de serviço aberta com sucesso!" });
 
 
 });
