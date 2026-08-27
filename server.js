@@ -9,7 +9,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Lista de clientes conectados esperando notificações
+// URL da sua planilha no Google Apps Script
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby58v2nzA2jv04iJzevVivgrkJbkL6o19W7nLF2OJEwuXevIpau9t7kVq3N22ou1h9D9g/exec';
+
+// Lista de clientes conectados esperando notificações (SSE)
 let clientesSSE = [];
 
 // Criar tabela de Ordens de Serviço se não existir
@@ -50,7 +53,7 @@ app.get('/api/notificacoes', (req, res) => {
   });
 });
 
-// Função para avisar todos os painéis abertos
+// Função para avisar os painéis abertos
 function notificarNovosClientes(dadosOrdem) {
   clientesSSE.forEach(cliente => {
     cliente.write(`data: ${JSON.stringify(dadosOrdem)}\n\n`);
@@ -87,12 +90,20 @@ app.post('/api/os', (req, res) => {
 
     const novaOrdem = {
       id: this.lastID,
-      cliente_nome,
-      equipamento_modelo
+      cliente_nome, cliente_cpf, cliente_telefone, cliente_email,
+      cep, rua, numero, bairro, cidade,
+      equipamento_modelo, numero_serie, senha_windows, acessorios, defeito_relatado
     };
 
-    // Dispara o aviso em tempo real
+    // 1. Notifica o painel em tempo real (Pop-up no lista.html)
     notificarNovosClientes(novaOrdem);
+
+    // 2. Envia os dados para a Planilha do Google
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(novaOrdem)
+    }).catch(err => console.error("Erro ao enviar para o Google Sheets:", err));
 
     console.log("Nova ordem cadastrada com ID:", this.lastID);
     res.json({ success: true, id: this.lastID });
