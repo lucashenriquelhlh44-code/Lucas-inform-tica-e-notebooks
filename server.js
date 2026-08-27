@@ -1,244 +1,82 @@
 const express = require('express');
-
-
 const sqlite3 = require('sqlite3').verbose();
-
-
-const dotenv = require('dotenv');
-
-
-const { MercadoPagoConfig, Payment } = require('mercadopago');
-
-
 const path = require('path');
 
-
-
-dotenv.config();
-
-
 const app = express();
+const db = new sqlite3.Database('./banco.db');
 
 app.use(express.json());
-
-
-
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-
-// Inicialização do Banco de Dados SQLite
-const db = new sqlite3.Database('./lucas_informatica.db', (err) => {
-  if (err) {
-    console.error("Erro ao abrir banco de dados:", err.message);
-  } else {
-    console.log("Banco de Dados SQLite conectado com sucesso.");
-  }
-});
-
-
-
-// Criação da Tabela de Ordens de Serviço (Tabela completa baseada no modelo original)
-
-
+// Criar tabela de Ordens de Serviço se não existir
 db.serialize(() => {
-
-
-db.run(`
-
-
-CREATE TABLE IF NOT EXISTS ordem_servico (
-
-
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-
-data_entrada DATETIME DEFAULT CURRENT_TIMESTAMP,
-
-
-cliente_nome TEXT NOT NULL,
-
-
-cliente_cpf_cnpj TEXT NOT NULL,
-
-
-cliente_telefone TEXT NOT NULL,
-
-
-cliente_email TEXT NOT NULL,
-
-
-equipamento_modelo TEXT NOT NULL,
-
-
-numero_serie TEXT,
-
-
-senha_acesso TEXT,
-
-
-acessorios TEXT,
-
-
-defeito_relatado TEXT NOT NULL,
-
-
-status_os TEXT DEFAULT 'Em Análise',
-
-
-status_pagamento TEXT DEFAULT 'Pendente'
-
-
-)
-
-
-`);
-
-
+  db.run(`
+    CREATE TABLE IF NOT EXISTS ordem_servico (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      cliente_nome TEXT,
+      cliente_cpf TEXT,
+      cliente_telefone TEXT,
+      cliente_email TEXT,
+      cep TEXT,
+      rua TEXT,
+      numero TEXT,
+      bairro TEXT,
+      cidade TEXT,
+      equipamento_modelo TEXT,
+      numero_serie TEXT,
+      senha_windows TEXT,
+      acessorios TEXT,
+      defeito_relatado TEXT,
+      status_os TEXT DEFAULT 'Em Análise',
+      data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
 });
 
-
-// Configuração do Gateway Mercado Pago
-
-
-const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN
-
-
-|| 'SUA_CHAVE_AQUI' });
-
-
-const payment = new Payment(client);
-
-
-// Endpoint 1: Cadastrar Ordem de Serviço (Grava no Banco de Dados)
-
-
+// Rota para cadastrar nova ordem
 app.post('/api/os', (req, res) => {
+  const {
+    cliente_nome, cliente_cpf, cliente_telefone, cliente_email,
+    cep, rua, numero, bairro, cidade,
+    equipamento_modelo, numero_serie, senha_windows, acessorios, defeito_relatado
+  } = req.body;
 
+  const sql = `
+    INSERT INTO ordem_servico (
+      cliente_nome, cliente_cpf, cliente_telefone, cliente_email,
+      cep, rua, numero, bairro, cidade,
+      equipamento_modelo, numero_serie, senha_windows, acessorios, defeito_relatado
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
 
-const { nome, cpf, telefone, email, modelo, num_serie, senha, acessorios, defeito } =
+  const params = [
+    cliente_nome, cliente_cpf, cliente_telefone, cliente_email,
+    cep, rua, numero, bairro, cidade,
+    equipamento_modelo, numero_serie, senha_windows, acessorios, defeito_relatado
+  ];
 
-
-req.body;
-
-
-const query = `INSERT INTO ordem_servico
-
-
-(cliente_nome, cliente_cpf_cnpj, cliente_telefone, cliente_email, equipamento_modelo,
-
-
-numero_serie, senha_acesso, acessorios, defeito_relatado)VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-
-db.run(query, [nome, cpf, telefone, email, modelo, num_serie, senha,
-
-
-JSON.stringify(acessorios), defeito], function(err) {
-
-
-if (err) {
-
-
-console.error(err);
-
-
-return res.status(500).json({ success: false, error: err.message });
-
-
-}
-
-
-res.json({ success: true, os_id: this.lastID, message: "Ordem de serviço aberta com sucesso!" });
-
-
+  db.run(sql, params, function (err) {
+    if (err) {
+      console.error("Erro ao salvar ordem:", err.message);
+      return res.status(500).json({ error: err.message });
+    }
+    console.log("Nova ordem cadastrada com ID:", this.lastID);
+    res.json({ success: true, id: this.lastID });
+  });
 });
 
-
-});
-
-
-// Endpoint 2: Processar Pagamento via PIX/Gateway
-
-
-app.post('/api/checkout', async (req, res) => {
-
-
-try {
-
-
-const { item_titulo, valor, email_cliente, cpf_cliente } = req.body;
-
-
-const body = {
-
-
-transaction_amount: Number(valor),
-
-
-description: item_titulo,
-
-
-payment_method_id: 'pix',
-
-
-payer: {
-
-
-email: email_cliente,
-
-
-identification: { type: 'CPF', number: cpf_cliente.replace(/\D/g, '') }
-
-
-}
-
-
-};
-
-
-const response = await payment.create({ body });
-
-
-res.json({
-
-
-id_transacao: response.id,
-
-
-qr_code: response.point_of_interaction.transaction_data.qr_code,
-
-
-qr_code_base64: response.point_of_interaction.transaction_data.qr_code_base64
-
-
-});
-
-
-} catch (error) {
-
-
-console.error(error);
-
-
-res.status(500).json({ error: error.message });
-
-
-}
-
-
-});
-
-// Rota para listar todas as ordens de serviço cadastradas
+// Rota para listar todas as ordens de serviço
 app.get('/api/ordens', (req, res) => {
   db.all("SELECT * FROM ordem_servico", [], (err, rows) => {
     if (err) {
-      console.error("Erro ao buscar no banco:", err.message);
-      return res.status(500).json({ erro: err.message });
+      console.error("Erro ao buscar ordens:", err.message);
+      return res.status(500).json({ error: err.message });
     }
     console.log("Ordens encontradas no banco:", rows.length);
     res.json(rows);
   });
-
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
