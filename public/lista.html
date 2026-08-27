@@ -37,6 +37,26 @@
       padding: 10px; margin-top: 10px; color: #ffb703; font-size: 0.9rem;
     }
     .loading, .empty-msg { text-align: center; color: #a0aec0; margin-top: 30px; }
+    /* Estilo do Pop-up de Notificação */
+.popup-notificacao {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #2a2e37;
+  border-left: 5px solid #4ade80;
+  color: #ffffff;
+  padding: 16px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
   </style>
 </head>
 <body>
