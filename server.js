@@ -232,11 +232,13 @@ res.status(500).json({ error: error.message });
 app.get('/api/ordens', (req, res) => {
   db.all("SELECT * FROM ordem_servico", [], (err, rows) => {
     if (err) {
+      console.error("Erro ao buscar no banco:", err.message);
       return res.status(500).json({ erro: err.message });
     }
+    console.log("Ordens encontradas no banco:", rows.length);
     res.json(rows);
   });
-});
+
 
 const PORT = process.env.PORT || 3000;
 
